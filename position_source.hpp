@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <memory>
+#include <mutex>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/mem_fun.hpp>
@@ -244,6 +245,11 @@ namespace generated {
     /// the position_source table itself
     //////
     position_source_table  position_source_table_;
+
+    //////
+    /// synchronizes access to singleton data
+    //////
+    std::mutex  lock_;
   };
 
   //////
@@ -263,6 +269,7 @@ namespace generated {
   position_source_mapping::
   load(connection_ptr conn) {
 
+    std::lock_guard<std::mutex>  guard(lock_);
     std::string sp = "exec vm_read_rate_source";
     position_source area;
     int result = conn->execute(sp);
@@ -285,6 +292,7 @@ namespace generated {
   find_by_composite_key(const std::string& source,
                         int index) {
 
+    std::lock_guard<std::mutex>  guard(lock_);
     const auto& p = position_source_table_.get<composite_key_tag>();
     auto q = p.find(boost::make_tuple(source,index));
     return q != p.end() ? *q : position_source::ptr();
@@ -294,6 +302,7 @@ namespace generated {
   position_source_mapping::
   find_by_source(const std::string& source) {
 
+    std::lock_guard<std::mutex>  guard(lock_);
     const auto& p = position_source_table_.get<source_tag>();
     auto q = p.find(source);
     return q != p.end() ? *q : position_source::ptr();
@@ -303,6 +312,7 @@ namespace generated {
   position_source_mapping::
   find_by_index(int index) {
 
+    std::lock_guard<std::mutex>  guard(lock_);
     const auto& p = position_source_table_.get<index_tag>();
     auto q = p.find(index);
     return q != p.end() ? *q : position_source::ptr();
