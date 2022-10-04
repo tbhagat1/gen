@@ -607,6 +607,7 @@ namespace framework {
          << "#include <set>" << std::endl
          << "#include <string>" << std::endl
          << "#include <memory>" << std::endl
+         << "#include <mutex>" << std::endl
          << "#include <boost/multi_index_container.hpp>" << std::endl
          << "#include <boost/multi_index/member.hpp>" << std::endl
          << "#include <boost/multi_index/mem_fun.hpp>" << std::endl
@@ -1240,6 +1241,11 @@ namespace framework {
          << class_name
          << "_table_;"
          << std::endl
+         << std::endl;
+    ofs_ << "    //////" << std::endl
+         << "    /// synchronizes access to singleton data" << std::endl
+         << "    //////" << std::endl
+         << "    std::mutex  lock_;" << std::endl
          << "  };" << std::endl << std::endl;
   }
 
@@ -1269,7 +1275,10 @@ namespace framework {
          << "  //////" << std::endl
          << "  inline bool" << std::endl
          << "  " << class_name << "_mapping" << "::" << std::endl
-         << "  load(connection_ptr conn) {" << std::endl << std::endl;
+         << "  load(connection_ptr conn) {"
+         << std::endl << std::endl
+         << "    std::lock_guard<std::mutex>  guard(lock_);"
+         << std::endl;
 
     const auto& sps = component_->get_stored_procs();
     auto i = sps.find("read");
@@ -1341,6 +1350,8 @@ namespace framework {
         ofs_ << std::endl;
       }
       ofs_ << std::endl;
+      ofs_ << "    std::lock_guard<std::mutex>  guard(lock_);"
+           << std::endl;
       ofs_ << "    const auto& p = "
            << component_->class_name() + "_table_.get<"
            << alias << "_tag>();"
