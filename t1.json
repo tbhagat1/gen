@@ -1,0 +1,71 @@
+{
+  "position_source" : {
+    "needs-mapping" : "true",
+    "fields" : [
+      {
+        "name" : "source",
+        "type" : "std::string",
+        "size" : "64",
+        "db_name" : "position_source"
+      },
+      {
+        "name" : "type",
+        "type" : "std::string",
+        "size" : "64",
+        "db_name" : "position_type"
+      },
+      {
+        "name" : "date",
+        "type" : "std::string",
+        "size" : "64",
+        "db_name" : "position_type"
+      },
+      {
+        "name" : "index",
+        "type" : "int",
+        "db_name" : "position_index"
+      }
+    ],
+    "stored_procs" : [
+      {
+        "name" : "vm_read_rate_source",
+        "type" : "read",
+        "parameters" : {
+          "AM_COLLECT" : "std::string"
+        }
+      },
+      {
+        "name" : "vm_insert_rate_source",
+        "type" : "insert"
+      },
+      {
+        "name" : "vm_delete_rate_source",
+        "type" : "delete"
+      }
+    ],
+    "indices" : [
+      {
+        "type" : "ordered-unique",
+        "alias" : "composite_key",
+        "keys" : {
+          "source" : "std::string",
+          "index"  : "int"
+        }
+      },
+      {
+        "type" : "ordered-non-unique",
+        "alias" : "source",
+        "keys" : {
+          "source" : "std::string"
+        }
+      },
+      {
+        "type" : "ordered-non-unique",
+        "alias" : "index",
+        "keys" : {
+          "index" : "int"
+        }
+      }
+    ]
+  }
+}
